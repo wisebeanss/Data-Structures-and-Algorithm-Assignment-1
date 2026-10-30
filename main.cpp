@@ -134,7 +134,21 @@ int main(void) {
 			}
 			break;
 		case '-':
-
+			if (list.getLength() == 2) {
+				cout << "2 Nodes detected. Cannot delete";
+			}
+			else if (current == list.head) {
+				current = list.head->next;
+				list.deleteValue(list.head->data);
+			}
+			else if (current == list.tail) {
+				current = list.tail->back;
+				list.deleteValue('N');
+				current->data = 'N';
+			}
+			else {
+				list.deleteValue(current->data);
+			}
 			break;
 		case 'q':
 			break;

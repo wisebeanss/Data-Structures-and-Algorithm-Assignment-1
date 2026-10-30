@@ -3,6 +3,7 @@
 LinkedList::LinkedList() {
 	head = nullptr;
 	tail = nullptr;
+	length = 0;
 }
 void LinkedList::InsertAtHead(char data) {
 	if (head == nullptr) {
@@ -15,6 +16,7 @@ void LinkedList::InsertAtHead(char data) {
 		newNode->next = head;
 		head = newNode;
 	}
+	length++;
 }
 void LinkedList::InsertAtTail(char data) {
 	if (head == nullptr) {
@@ -27,6 +29,7 @@ void LinkedList::InsertAtTail(char data) {
 		newNode->back = tail;
 		tail = newNode;
 	}
+	length++;
 
 }
 void LinkedList::InsertAfter(char data, Node* node) {
@@ -35,6 +38,7 @@ void LinkedList::InsertAfter(char data, Node* node) {
 	newNode->next = node->next;
 	newNode->back = node;
 	node->next = newNode;
+	length++;
 }
 void LinkedList::InsertBefore(char data, Node* node) {
 	if (node == nullptr) return;
@@ -48,6 +52,7 @@ void LinkedList::InsertBefore(char data, Node* node) {
 		head = newNode;
 	}
 	node->back = newNode;
+	length++;
 }
 LinkedList::~LinkedList() {
 	Node* node = head;
@@ -73,10 +78,13 @@ void LinkedList::deleteValue(char data) {
 		node->back = prev;
 	}
 	delete node;
-
+	length--;
 }
 void LinkedList::display() {
 	for (Node* node = head; node != nullptr; node = node->next) {
 		std::cout << node->data << " ";
 	}
+}
+int LinkedList::getLength() const {
+	return length;
 }

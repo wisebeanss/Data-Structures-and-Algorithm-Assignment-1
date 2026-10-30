@@ -4,9 +4,11 @@
 class LinkedList
 {
 private:
+	int length;
 public:
 	Node* head;
 	Node* tail;
+	
 	LinkedList();
 	~LinkedList();
 	void InsertAtHead(char data);
@@ -15,5 +17,6 @@ public:
 	void InsertBefore(char data, Node* node);
 	void deleteValue(char data);
 	void display();
+	int getLength() const;
 };
 
