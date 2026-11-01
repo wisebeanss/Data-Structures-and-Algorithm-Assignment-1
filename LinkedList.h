@@ -11,11 +11,14 @@ public:
 	
 	LinkedList();
 	~LinkedList();
+	LinkedList(const LinkedList& rhs);
 	void InsertAtHead(char data);
 	void InsertAtTail(char data);
 	void InsertAfter(char data, Node* node);
 	void InsertBefore(char data, Node* node);
-	void deleteValue(char data);
+	void deleteNode(Node* node);
+	int indexOf(Node* target);
+	Node* nodeAt(int index);
 	void display();
 	int getLength() const;
 };

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <Windows.h>
 #include "LinkedList.h"
-using namespace std;
+
 
 char opposite(char dir) {
 	switch (dir) {
@@ -22,25 +22,8 @@ char convertWASDtoULDR(char dir) {
 	}
 	return '\0';
 }
-//char convertULDRtoWASD(char dir) {
-//	switch (dir) {
-//	case 'U': return 'W';
-//	case 'L': return 'A';
-//	case 'D': return 'S';
-//	case 'R': return 'D';
-//	}
-//}
-bool tryMove(Node*& current, char dir) {
-	if (current->next != nullptr && current->data == dir) {
-		current = current->next;
-		return true;
-	}
-	if (current->back != nullptr && current->back->data == opposite(dir)) {
-		current = current->back;
-		return true;
-	}
-	return false;
-}
+
+
 void setCursorPosition(SHORT x, SHORT y) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD pos = { x, y };
@@ -48,8 +31,66 @@ void setCursorPosition(SHORT x, SHORT y) {
 }
 void drawAt(int x, int y, char symbol) {
 	setCursorPosition(x, y);
-	cout << symbol;
+	std::cout << symbol;
 }
+
+bool isValidPath(LinkedList list) {
+	int mouseX = 0; int mouseY = 0; int index = 0;
+	int length = list.getLength();
+	int* mouseXseen = new int[length + 1];
+	int* mouseYseen = new int[length + 1];
+	bool invalid = false;
+	//Record Start cell
+	mouseXseen[index] = mouseX;
+	mouseYseen[index] = mouseY;
+	index++;
+	for (Node* n = list.head; n != nullptr; n = n->next) {
+		int dx = 0; int dy = 0;
+		switch (n->data) {
+		case 'U':
+			dy = -2;
+			break;
+		case 'L':
+			dx = -2;
+			break;
+		case 'D':
+			dy = 2; 
+			break;
+		case 'R':
+			dx = 2; 
+			break;
+		default:
+			continue;
+		}
+		mouseX += dx;
+		mouseY += dy;
+		
+		if (mouseX < 0 || mouseY < 0) {
+			invalid = true;
+		}
+		for (int i = 0; i < index; i++) {
+			if (mouseXseen[i] == mouseX && mouseYseen[i] == mouseY) {
+				invalid = true;
+			}
+		}
+		if (index > length) {
+			invalid = true;
+		}
+		if (invalid) {
+			delete[] mouseXseen;
+			delete[] mouseYseen;
+			return false;
+		}
+		mouseXseen[index] = mouseX;
+		mouseYseen[index] = mouseY;
+		index++;
+
+	}
+	delete[] mouseXseen;
+	delete[] mouseYseen;
+	return true;
+}
+
 void constructMap(LinkedList &list, Node*& current) {
 	int mouseX = 0;
 	int mouseY = 0;
@@ -86,6 +127,40 @@ void constructMap(LinkedList &list, Node*& current) {
 	//Makes sure the path does not get cutoff
 	setCursorPosition(0, maxY + 2);
 }
+bool tryMove(Node*& current, char dir) {
+	if (current->next != nullptr && current->data == dir) {
+		current = current->next;
+		return true;
+	}
+	if (current->back != nullptr && current->back->data == opposite(dir)) {
+		current = current->back;
+		return true;
+	}
+	return false;
+}
+bool tryInsert(LinkedList& list, Node* current, char dir) {
+	int idx = list.indexOf(current);
+	LinkedList copyList(list);
+	copyList.InsertAfter(dir, copyList.nodeAt(idx));
+	if (!isValidPath(copyList)) {
+		return false;
+	}
+	list.InsertAfter(dir, current);
+	return true;
+}
+bool tryDelete(LinkedList& list, Node* current) {
+	if (current == nullptr) {
+		return false;
+	}
+	int idx = list.indexOf(current);
+	LinkedList copyList(list);
+	copyList.deleteNode(copyList.nodeAt(idx));
+	if (!isValidPath(copyList)) {
+		return false;
+	}
+	list.deleteNode(current);
+	return true;
+}
 int main(void) {
 	char c;
 	LinkedList list;
@@ -100,67 +175,85 @@ int main(void) {
 		myfile.close();
 	}
 	else {
-		cout << "Unable to open file\n";
+		std::cout << "Unable to open file\n";
 	}
 	char input;
-	char insertInput;
+	
 	
 	Node* current = list.head;
 	bool moved = true;
+	bool insertSuccessful = true;
+	bool deleteSuccessful = true;
+	const char* message = nullptr;
 	do {
+		moved = true;
+		//Clears the screen, moves cursor to the top-left corner
+		std::cout << "\033[2J\033[H";
 		constructMap(list, current);
-		cout << "Edit Mode: WASD to Move, + to add, - to del, q to quit: ";
-		cin >> input;
+		//Put Messaging System here
+		std::cout << "Edit Mode: WASD to Move, + to add, - to del, q to quit: ";
+		std::cin >> input;
+		if (message) {
+			std::cout << "\n" << message;
+			message = nullptr;
+		}
 		switch (input) {
 		case 'W':
 		case 'A':
 		case 'S':
 		case 'D':
-			moved = tryMove(current, convertWASDtoULDR(input));
+			if (!tryMove(current, convertWASDtoULDR(input))) {
+				message = "Invalid Direction";
+			}
 			break;
 		case '+':
 			if (current == list.tail) {
-				cout << "Last Node Detected! Enter Direction of tail node (WASD): ";
-				cin >> insertInput;			
-				if (insertInput != 'W' && insertInput != 'A' && insertInput != 'S' && insertInput != 'D') {
-					cout << "\n Invalid Direction";
-					break;
+				char insertInput;
+				std::cout << "Last Node Detected! Enter Direction of tail node (WASD): ";
+				std::cin >> insertInput;
+				char dir = convertWASDtoULDR(insertInput);
+				if (dir == '\0') {
+					message = "Invalid Direction";
 				}
-				list.InsertBefore(convertWASDtoULDR(insertInput), list.tail);
-				list.display();
+
+				insertSuccessful = tryInsert(list, current->back, convertWASDtoULDR(insertInput));
 			}
 			else {
-				list.InsertAfter(current->data, current);
+				insertSuccessful = tryInsert(list, current, current->data);
 			}
+			if (!insertSuccessful) {
+				message = "Invalid Insertion";
+				break;
+			}
+			
 			break;
 		case '-':
-			if (list.getLength() == 2) {
-				cout << "2 Nodes detected. Cannot delete";
-			}
-			else if (current == list.head) {
-				current = list.head->next;
-				list.deleteValue(list.head->data);
-			}
-			else if (current == list.tail) {
-				current = list.tail->back;
-				list.deleteValue('N');
-				current->data = 'N';
+			if (list.getLength() <= 2) {
+				message = "2 Nodes detected. Cannot delete";
 			}
 			else {
-				list.deleteValue(current->data);
+				Node* next = current->next;
+				Node* prev = current->back;
+
+				if (tryDelete(list, current)) {
+					current = (next != nullptr) ? next : prev;
+				}
+				else {
+					message = "Invalid Deletion";
+				}
 			}
 			break;
 		case 'q':
 			break;
 		default:
 			moved = false;
-			cout << "Invalid Input Error";
+			message = "Invalid Input Error";
 		}
 		if (!moved) {
-			cout << "Invalid Direction";
+			message = "Invalid Direction";
 		}
-		//Clears the screen, moves cursor to the top-left corner
-		cout << "\033[2J\033[H" << endl;
+		
+		
 	} while (input != 'q');
   
 	return 0;

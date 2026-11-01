@@ -5,15 +5,24 @@ LinkedList::LinkedList() {
 	tail = nullptr;
 	length = 0;
 }
+
+LinkedList::LinkedList(const LinkedList& rhs) {
+	head = nullptr;
+	tail = nullptr;
+	length = 0;
+	for (Node* node = rhs.head; node != nullptr; node = node->next) {
+		InsertAtTail(node->data);
+	}
+}
 void LinkedList::InsertAtHead(char data) {
 	if (head == nullptr) {
 		head = new Node(data);
 		tail = head;
-
 	}
 	else {
 		Node* newNode = new Node(data);
 		newNode->next = head;
+		head->back = newNode;
 		head = newNode;
 	}
 	length++;
@@ -33,10 +42,18 @@ void LinkedList::InsertAtTail(char data) {
 
 }
 void LinkedList::InsertAfter(char data, Node* node) {
-	if (node == nullptr) return;
+	if (node == nullptr) {
+		return;
+	}
 	Node* newNode = new Node(data);
 	newNode->next = node->next;
 	newNode->back = node;
+	if (node->next != nullptr) {
+		node->next->back = newNode;
+	}
+	else {
+		tail = newNode;
+	}
 	node->next = newNode;
 	length++;
 }
@@ -63,22 +80,47 @@ LinkedList::~LinkedList() {
 	}
 }
 
-
-void LinkedList::deleteValue(char data) {
-	Node* node = head;
-	Node* prev = nullptr;
-	while (node != nullptr && node->data != data) {
-		prev = node;
-		node = node->next;
+void LinkedList::deleteNode(Node* node) {
+	if (node == nullptr) return;
+	if (node->back != nullptr) {
+		node->back->next = node->next;
 	}
-	if (node == nullptr) { return; }
-	if (prev == nullptr) { head = node->next; }
 	else {
-		prev->next = node->next;
-		node->back = prev;
+		head = node->next;
+	}
+	if (node->next != nullptr) {
+		node->next->back = node->back;
+	}
+	else {
+		tail = node->back;
 	}
 	delete node;
 	length--;
+}
+int LinkedList::indexOf(Node* target) {
+	int index = 0;
+	Node* node = head;
+	while (node != nullptr) {
+		if (node == target) {
+			return index;
+		}
+		else {
+			node = node->next;
+			index++;
+		}
+
+	}
+	return -1;
+}
+Node* LinkedList::nodeAt(int index) {
+	Node* node = head;
+	for (int i = 0; i < index; i++) {
+		if (node != nullptr) {
+			node = node->next;
+		}
+		
+	}
+	return node;
 }
 void LinkedList::display() {
 	for (Node* node = head; node != nullptr; node = node->next) {
