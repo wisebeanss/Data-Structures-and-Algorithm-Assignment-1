@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <Windows.h>
+#include <string>
 #include "LinkedList.h"
 
 
@@ -28,6 +29,16 @@ void setCursorPosition(SHORT x, SHORT y) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD pos = { x, y };
 	SetConsoleCursorPosition(hConsole, pos);
+}
+COORD getCursorPosition(HANDLE hConsoleOutput) {
+	CONSOLE_SCREEN_BUFFER_INFO cbsi;
+	if (GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi)) {
+		return cbsi.dwCursorPosition;
+	}
+	else {
+		COORD invalid = { 0, 0 };
+		return invalid;
+	}
 }
 void drawAt(int x, int y, char symbol) {
 	setCursorPosition(x, y);
@@ -181,22 +192,21 @@ int main(void) {
 	
 	
 	Node* current = list.head;
-	bool moved = true;
 	bool insertSuccessful = true;
 	bool deleteSuccessful = true;
-	const char* message = nullptr;
+	std::string message;
 	do {
-		moved = true;
 		//Clears the screen, moves cursor to the top-left corner
 		std::cout << "\033[2J\033[H";
 		constructMap(list, current);
 		//Put Messaging System here
 		std::cout << "Edit Mode: WASD to Move, + to add, - to del, q to quit: ";
+		COORD mousePos = getCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE));
+		std::cout << "\n" << message;
+		message = " ";
+		//Moves cursor back to edit message
+		setCursorPosition(mousePos.X, mousePos.Y);
 		std::cin >> input;
-		if (message) {
-			std::cout << "\n" << message;
-			message = nullptr;
-		}
 		switch (input) {
 		case 'W':
 		case 'A':
@@ -246,11 +256,7 @@ int main(void) {
 		case 'q':
 			break;
 		default:
-			moved = false;
 			message = "Invalid Input Error";
-		}
-		if (!moved) {
-			message = "Invalid Direction";
 		}
 		
 		
