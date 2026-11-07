@@ -122,11 +122,17 @@ Node* LinkedList::nodeAt(int index) {
 	}
 	return node;
 }
-void LinkedList::display() {
-	for (Node* node = head; node != nullptr; node = node->next) {
-		std::cout << node->data << " ";
-	}
-}
+
 int LinkedList::getLength() const {
 	return length;
 }
+void setCursorPosition(SHORT x, SHORT y) {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos = { x, y };
+	SetConsoleCursorPosition(hConsole, pos);
+}
+void drawAt(int x, int y, char symbol) {
+	setCursorPosition(x, y);
+	std::cout << symbol;
+}
+
