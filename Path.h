@@ -11,7 +11,6 @@ public:
 	Node* current;
 	Path();
 	~Path();
-	COORD getCursorPosition();
 	void setCursorPosition(SHORT x, SHORT y);
 	void drawAt(int x, int y, char symbol);
 	int construct();

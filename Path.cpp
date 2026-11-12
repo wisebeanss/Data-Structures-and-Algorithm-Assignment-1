@@ -28,18 +28,7 @@ char Path::convertWASDtoULDR(char dir) {
 	return '\0';
 }
 
-// Cursor Functions
-COORD Path::getCursorPosition() {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO cbsi;
-	if (GetConsoleScreenBufferInfo(hConsole, &cbsi)) {
-		return cbsi.dwCursorPosition;
-	}
-	else {
-		COORD invalid = { 0, 0 };
-		return invalid;
-	}
-}
+
 void Path::setCursorPosition(SHORT x, SHORT y) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD pos = { x, y };

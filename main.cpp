@@ -1,6 +1,17 @@
 #include <iostream>
 #include "Path.h"
 
+COORD getCursorPosition() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO cbsi;
+	if (GetConsoleScreenBufferInfo(hConsole, &cbsi)) {
+		return cbsi.dwCursorPosition;
+	}
+	else {
+		COORD invalid = { 0, 0 };
+		return invalid;
+	}
+}
 int main(void) {
 	char c;
 	Path path;
@@ -29,7 +40,7 @@ int main(void) {
 		//Put Messaging System here
 		path.setCursorPosition(0, bottom + 2);
 		std::cout << "Edit Mode: WASD to Move, + to add, - to del, q to quit: ";
-		COORD mousePos = path.getCursorPosition();
+		COORD mousePos = getCursorPosition();
 		std::cout << "\n" << message;
 		message = " ";
 		//Moves cursor back to edit message
