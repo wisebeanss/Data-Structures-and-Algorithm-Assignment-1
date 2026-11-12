@@ -139,15 +139,15 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleManagement.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
-    <ClCompile Include="Path.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleManagement.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Node.h" />
-    <ClInclude Include="Path.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="path.txt" />
